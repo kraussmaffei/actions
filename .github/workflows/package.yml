@@ -6,21 +6,23 @@ on:
 name: Package
 
 jobs:
-  check:
-    name: Package distribution file
+  package:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        actions: ["ssh-agent"]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+    - uses: rudolphmatthias/actions/ssh-agent@main
       with:
-        ref: master
-    - name: Package
-      run: |
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - run: |
+        cd ${{ matrix.actions }}
         npm ci
         npm run package
-    - name: Commit
-      run: |
+    - run: |
+        cd ${{ matrix.actions }}
         git config --global user.name "GitHub Actions"
         git add dist/
         git commit -m "chore: Update dist" || echo "No changes to commit"
-        git push origin HEAD:master
+        git push origin HEAD:main
