@@ -1,0 +1,18 @@
+on:
+  workflow_run:
+    workflows: ["Package"]
+    branches: [main]
+    types:
+      - completed
+name: Test
+jobs:
+  test:
+    name: Run local Action
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Local Action
+        uses: ./ssh-agent
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}

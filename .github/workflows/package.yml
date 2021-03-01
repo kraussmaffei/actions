@@ -1,28 +1,24 @@
-on:
-  push:
-    branches:
-      - master
-
+on: push
 name: Package
-
 jobs:
   package:
-    runs-on: ubuntu-latest
+    name: Package distribution file
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         actions: ["ssh-agent"]
     steps:
-    - uses: actions/checkout@v2
-    - uses: rudolphmatthias/actions/ssh-agent@main
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-    - run: |
-        cd ${{ matrix.actions }}
-        npm ci
-        npm run package
-    - run: |
-        cd ${{ matrix.actions }}
-        git config --global user.name "GitHub Actions"
-        git add dist/
-        git commit -m "chore: Update dist" || echo "No changes to commit"
-        git push origin HEAD:main
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Package
+        run: |
+          cd ${{ matrix.actions }}
+          npm ci
+          npm run package
+      - name: Commit
+        run: |
+          cd ${{ matrix.actions }}
+          git config --global user.name "GitHub Actions"
+          git add dist/
+          git commit -m "chore: Update dist" || echo "No changes to commit"
+          git push origin HEAD:main

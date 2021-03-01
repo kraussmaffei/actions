@@ -1,7 +1,6 @@
 # custom ignores
 *.env
 *.secrets
-node_modules/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -16,6 +15,7 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+node_modules/
 downloads/
 eggs/
 .eggs/

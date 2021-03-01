@@ -23,7 +23,7 @@ try {
     } else {
         // Use getent() system call, since this is what ssh does; makes a difference in Docker-based
         // Action runs, where $HOME is different from the pwent
-        var { homedir: home } = os.userInfo();
+        home = os.userInfo().homedir;
     }
 
     const homeSsh = home + '/.ssh';
