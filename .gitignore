@@ -118,3 +118,6 @@ Pipfile.lock
 # vscode
 .vscode/
 .vscode/*
+
+# whitelist
+!ssh-agent/**

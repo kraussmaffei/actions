@@ -1,0 +1,9 @@
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: rudolphmatthias/actions/ssh-agent@main
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
