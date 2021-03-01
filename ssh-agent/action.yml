@@ -1,0 +1,25 @@
+name: 'Setup ssh-agent'
+description: 'Setup the ssh-agent with an ssh-private-key and ssh-known-host'
+inputs:
+  ssh-private-key:
+    required: true
+  ssh-known-host:
+    required: true
+
+outputs:
+  socket:
+    description: "generated ssh socket"
+    value: ${{ steps.setup-ssh-agent.outputs.socket }}
+
+
+runs:
+  using: "composite"
+  steps:
+    - id: setup-ssh-agent
+      run: |
+        mkdir -p ~/.ssh
+        echo ${{ inputs.ssh-known-host }} >> ~/.ssh/known_hosts
+        eval `ssh-agent`
+        ssh-add - <<< "${{ inputs.ssh-private-key }}"
+        echo "::set-output name=socket::$SSH_AUTH_SOCK"
+      shell: bash
