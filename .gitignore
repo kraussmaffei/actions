@@ -1,6 +1,7 @@
 # custom ignores
 *.env
 *.secrets
+node_modules/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -118,3 +119,6 @@ Pipfile.lock
 # vscode
 .vscode/
 .vscode/*
+
+# whitelist
+!ssh-agent/dist
