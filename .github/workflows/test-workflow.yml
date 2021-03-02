@@ -1,9 +1,4 @@
-on:
-  workflow_run:
-    workflows: ["Package"]
-    branches: [main]
-    types:
-      - completed
+on: push
 name: Test
 jobs:
   test-ssh-agent:
@@ -29,7 +24,7 @@ jobs:
           ref: main
           task: deploy
           auto_merge: false
-          required_contexts: '*'
+          required_contexts: ''
           payload: ''
           environment: test
           description: ''

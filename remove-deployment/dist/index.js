@@ -369,7 +369,6 @@ async function main() {
           "Accept": "application/vnd.github.flash-preview+json, application/vnd.github.ant-man-preview+json",
         }
       }
-      console.log(req);
       await octokit.repos.createDeploymentStatus(req);
 
       // delete the deployment
