@@ -1,0 +1,17 @@
+name: Remove deployments
+description: Remove all deployments for this environment.
+
+inputs:
+  github-token:
+    description: |
+      The Github Token to use. Must have access to deployment.
+    required: true
+  environment:
+    description: |
+      Name for the target deployment environment (e.g., production, staging, qa).
+      Default: production
+    default: production
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

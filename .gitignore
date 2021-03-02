@@ -122,3 +122,5 @@ Pipfile.lock
 
 # whitelist
 !ssh-agent/dist
+!create-deployment/dist
+!remove-deployment/dist

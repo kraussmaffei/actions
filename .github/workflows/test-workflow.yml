@@ -6,8 +6,8 @@ on:
       - completed
 name: Test
 jobs:
-  test:
-    name: Run local Action
+  test-ssh-agent:
+    name: Run local ssh-agent
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
@@ -16,3 +16,34 @@ jobs:
         uses: ./ssh-agent
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+  test-create-deployment:
+    name: Run local create-deployment
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Local Action
+        uses: ./create-deployment
+        with:
+          github-token: ${{ secrets.DEPLOY_TOKEN }}
+          ref: main
+          task: deploy
+          auto_merge: false
+          required_contexts: '*'
+          payload: ''
+          environment: test
+          description: ''
+          production_environment: false
+          transient_environment: false
+  test-remove-deployment:
+    needs: [test-create-deployment]
+    name: Run local remove-deployment
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Local Action
+        uses: ./remove-deployment
+        with:
+          github-token: ${{ secrets.DEPLOY_TOKEN }}
+          environment: test

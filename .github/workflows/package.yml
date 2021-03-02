@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        actions: ["ssh-agent"]
+        actions: ["ssh-agent", "create-deployment", "remove-deployment"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
