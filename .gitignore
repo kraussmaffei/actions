@@ -125,3 +125,4 @@ Pipfile.lock
 !create-deployment/dist
 !remove-deployment/dist
 !configure-aws-credentials/dist
+!json-property/dist

@@ -1,0 +1,22 @@
+{
+  "name": "json-property",
+  "version": "1.0.0",
+  "description": "Extracts a property from a json file.",
+  "main": "index.ts",
+  "scripts": {
+    "lint": "eslint **.ts",
+    "package": "tsc && ncc build -o dist"
+  },
+  "author": "Kraussmaffei Technologies",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.31",
+    "@zeit/ncc": "^0.22.3",
+    "eslint": "^7.20.0",
+    "typescript": "3.8.3",
+    "babel-eslint": "^10.1.0"
+  }
+}

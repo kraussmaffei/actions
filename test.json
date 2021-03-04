@@ -1,0 +1,6 @@
+{
+  "test": "test",
+  "test_nested": {
+    "test": "arn:aws:iam::123456789:role/RoleName"
+  }
+}

@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        actions: ["ssh-agent", "create-deployment", "remove-deployment", "configure-aws-credentials"]
+        actions: [ "ssh-agent", "create-deployment", "remove-deployment", "configure-aws-credentials", "json-property" ]
       max-parallel: 1
     steps:
       - name: Checkout
@@ -15,4 +15,5 @@ jobs:
         run: |
           cd ${{ matrix.actions }}
           npm ci
+          npm run lint
           npm run package

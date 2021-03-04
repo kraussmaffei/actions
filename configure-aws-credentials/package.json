@@ -1,7 +1,7 @@
 {
-  "name": "github-deployment",
+  "name": "configure-aws-credentials",
   "version": "1.0.0",
-  "description": "Triggers a github deployment.",
+  "description": "Configures aws credentials as environment and shared credentials file.",
   "main": "index.js",
   "scripts": {
     "lint": "eslint **.js",
