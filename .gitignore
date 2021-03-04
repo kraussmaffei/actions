@@ -124,3 +124,4 @@ Pipfile.lock
 !ssh-agent/dist
 !create-deployment/dist
 !remove-deployment/dist
+!configure-aws-credentials/dist

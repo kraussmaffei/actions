@@ -1,7 +1,7 @@
 on: push
 name: Test
 jobs:
-  test-ssh-agent:
+  ssh-agent:
     name: Run local ssh-agent
     runs-on: ubuntu-18.04
     steps:
@@ -11,7 +11,7 @@ jobs:
         uses: ./ssh-agent
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-  test-create-deployment:
+  create-deployment:
     name: Run local create-deployment
     runs-on: ubuntu-18.04
     steps:
@@ -30,8 +30,8 @@ jobs:
           description: ''
           production_environment: false
           transient_environment: false
-  test-remove-deployment:
-    needs: [test-create-deployment]
+  remove-deployment:
+    needs: [ create-deployment ]
     name: Run local remove-deployment
     runs-on: ubuntu-18.04
     steps:
@@ -42,3 +42,18 @@ jobs:
         with:
           github-token: ${{ secrets.DEPLOY_TOKEN }}
           environment: test
+  configure-aws-credentials:
+    name: Configure AWS credentials
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Local Action
+        uses: ./configure-aws-credentials
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-profile: test
+          mask-aws-account-id: true
+      - run: aws --profile "test" sts get-caller-identity

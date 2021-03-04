@@ -1,7 +1,7 @@
 {
-  "name": "github-deployment",
+  "name": "create-deployment",
   "version": "1.0.0",
-  "description": "Triggers a github deployment.",
+  "description": "Create a github deployment.",
   "main": "index.js",
   "scripts": {
     "lint": "eslint **.js",

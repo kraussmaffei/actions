@@ -1,7 +1,7 @@
 {
-  "name": "github-deployment",
+  "name": "remove-deployment",
   "version": "1.0.0",
-  "description": "Triggers a github deployment.",
+  "description": "Removes a github deployment.",
   "main": "index.js",
   "scripts": {
     "lint": "eslint **.js",

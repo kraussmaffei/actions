@@ -1,0 +1,18 @@
+on: push
+name: Package
+jobs:
+  package:
+    name: Package distribution file
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        actions: ["ssh-agent", "create-deployment", "remove-deployment", "configure-aws-credentials"]
+      max-parallel: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Package
+        run: |
+          cd ${{ matrix.actions }}
+          npm ci
+          npm run package
