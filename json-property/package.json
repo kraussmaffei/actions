@@ -17,6 +17,7 @@
     "@zeit/ncc": "^0.22.3",
     "eslint": "^7.20.0",
     "typescript": "3.8.3",
-    "babel-eslint": "^10.1.0"
+    "babel-eslint": "^10.1.0",
+    "@typescript-eslint/parser": "4.16.1"
   }
 }

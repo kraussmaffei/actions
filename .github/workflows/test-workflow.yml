@@ -1,4 +1,4 @@
-on: push
+on: workflow_dispatch
 name: Test
 jobs:
   ssh-agent:
@@ -11,27 +11,34 @@ jobs:
         uses: ./ssh-agent
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-  create-deployment:
+  create-and-update-deployment:
     name: Run local create-deployment
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Local Action
+      - name: Create deployment
+        id: create-deployment
         uses: ./create-deployment
         with:
           github-token: ${{ secrets.DEPLOY_TOKEN }}
           ref: main
           task: deploy
-          auto_merge: false
-          required_contexts: ''
+          auto-merge: false
+          required-contexts: ''
           payload: ''
           environment: test
           description: ''
-          production_environment: false
-          transient_environment: false
+          production-environment: false
+          transient-environment: false
+      - name: Create deployment status
+        uses: ./create-deployment-status
+        with:
+          github-token: ${{ secrets.DEPLOY_TOKEN }}
+          deployment-id: ${{ steps.create-deployment.outputs.deployment-id }}
+          state: success
   remove-deployment:
-    needs: [ create-deployment ]
+    needs: create-and-update-deployment
     name: Run local remove-deployment
     runs-on: ubuntu-18.04
     steps:

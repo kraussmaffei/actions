@@ -123,6 +123,7 @@ Pipfile.lock
 # whitelist
 !ssh-agent/dist
 !create-deployment/dist
+!create-deployment-status/dist
 !remove-deployment/dist
 !configure-aws-credentials/dist
 !json-property/dist

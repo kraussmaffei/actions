@@ -4,13 +4,13 @@ const github = require('@actions/github');
 async function main() {
   const ref = core.getInput('ref') || github.context.ref || github.context.sha;
   const task = core.getInput('task', { required: true });
-  const auto_merge = core.getInput('auto_merge') === 'true';
+  const auto_merge = core.getInput('auto-merge') === 'true';
   const environment = core.getInput('environment', { required: true });
   const description = core.getInput('description');
-  const transient_environment = core.getInput('transient_environment') === 'true';
+  const transient_environment = core.getInput('transient-environment') === 'true';
 
   const default_production_environment = (environment === 'production').toString();
-  const production_environment = (core.getInput('production_environment') || default_production_environment) === 'true';
+  const production_environment = (core.getInput('production-environment') || default_production_environment) === 'true';
 
   const { owner, repo } = github.context.repo;
   const req = {
@@ -30,7 +30,7 @@ async function main() {
     req['payload'] = JSON.parse(payload);
   }
 
-  const required_contexts = core.getInput('required_contexts');
+  const required_contexts = core.getInput('required-contexts');
   if (required_contexts !== '*') {
     if (required_contexts === '') {
       req['required_contexts'] = [];
@@ -42,17 +42,16 @@ async function main() {
   const token = core.getInput('github-token');
   const octokit = github.getOctokit(token);
 
-  core.debug(JSON.stringify(req));
+  console.log('createDeployment %o', req);
   const resp = await octokit.repos.createDeployment(req);
-  core.debug(JSON.stringify(resp));
 
   if (resp.status >= 400) {
     throw new Error("Failed to create a new deployment");
   }
 
-  core.setOutput('deployment_id', resp.data.id.toString());
-  core.setOutput('deployment_url', resp.data.url);
-  core.setOutput('statuses_url', resp.data.statuses_url);
+  core.setOutput('deployment-id', resp.data.id.toString());
+  core.setOutput('deployment-url', resp.data.url);
+  core.setOutput('statuses-url', resp.data.statuses_url);
 }
 
 main().catch(function(error) {
