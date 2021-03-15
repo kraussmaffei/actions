@@ -5,6 +5,9 @@ inputs:
     required: true
   ssh-auth-sock:
     required: false
+outputs:
+  known-hosts-file-path:
+    description: 'The path where the knonw host file is located at'
 runs:
   using: 'node12'
   main: 'dist/index.js'
