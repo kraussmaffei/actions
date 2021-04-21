@@ -25,10 +25,10 @@ jobs:
           ref: main
           task: deploy
           auto-merge: false
-          required-contexts: ''
-          payload: ''
+          required-contexts: ""
+          payload: ""
           environment: test
-          description: ''
+          description: ""
           production-environment: false
           transient-environment: false
       - name: Create deployment status
