@@ -1,0 +1,22 @@
+{
+  "name": "codeartifact-login",
+  "version": "1.0.0",
+  "description": "Configure pip, twine and poetry for a codeartifact repository.",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint **.js",
+    "package": "ncc build index.js -o dist && ncc build cleanup.js -o dist/cleanup"
+  },
+  "author": "Kraussmaffei Technologies",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^4.0.0",
+    "aws-sdk": "^2.855.0",
+    "ini": "^2.0.0"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.22.3",
+    "eslint": "^7.20.0"
+  }
+}

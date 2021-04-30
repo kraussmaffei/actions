@@ -1,0 +1,29 @@
+name: '"Login to AWS Codeartifact" Action For GitHub Actions'
+description: 'Configure pip, twine and poetry for a codeartifact repository.'
+branding:
+  icon: 'cloud'
+  color: 'orange'
+inputs:
+  repository-name:
+    description: 'The name of the codeartifact repository.'
+    required: true
+  domain-name:
+    description: 'The domain of the codeartifact repository.'
+    required: true
+  domain-owner:
+    description: 'The aws account id where the domain is located.'
+    required: true
+  region:
+    description: 'The aws region where the domain and repository is located.'
+    required: true
+outputs:
+  codeartifact-repository-url:
+    description: 'The url of the logged in codeartifact repository.'
+  codeartifact-auth-token:
+    description: 'The pypi token for the codeartifact repository.'
+  codeartifact-user:
+    description: 'The pypi user for the codeartifact repository.'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+  post: 'dist/cleanup/index.js'
