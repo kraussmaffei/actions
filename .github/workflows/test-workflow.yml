@@ -75,3 +75,17 @@ jobs:
           path: ./test.json
           prop_path: test_nested.test
       - run: echo $test_nested_test
+
+  create-workflow-dispatch:
+    name: Run local workflow dispatch
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Local Action
+        uses: ./create-workflow-dispatch
+        with:
+          ref: main
+          github-token: ${{ secrets.DEPLOY_TOKEN }}
+          workflow-id: lint-and-package-workflow.yml
+          inputs: '{"test": "true"}'
