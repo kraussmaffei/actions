@@ -1,9 +1,9 @@
-on: 
+on:
   push:
   workflow_dispatch:
     inputs:
       test:
-        description: 'Testmode'
+        description: "Testmode"
         required: true
         default: "true"
 
@@ -15,7 +15,16 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        actions: [ "ssh-agent", "create-deployment", "remove-deployment", "configure-aws-credentials", "json-property", "create-workflow-dispatch" ]
+        actions:
+          [
+            "ssh-agent",
+            "create-deployment",
+            "remove-deployment",
+            "configure-aws-credentials",
+            "json-property",
+            "create-workflow-dispatch",
+            "semantic-version"
+          ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
