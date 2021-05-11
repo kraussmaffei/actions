@@ -75,7 +75,6 @@ jobs:
           path: ./test.json
           prop_path: test_nested.test
       - run: echo $test_nested_test
-
   create-workflow-dispatch:
     name: Run local workflow dispatch
     runs-on: ubuntu-18.04
@@ -89,3 +88,21 @@ jobs:
           github-token: ${{ secrets.DEPLOY_TOKEN }}
           workflow-id: lint-and-package-workflow.yml
           inputs: '{"test": "true"}'
+  semantic-version:
+    name: "Test and Run"
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: NPM Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Package
+        run: npm run package
+      - name: Run Action
+        uses: ./
+        id: run
+
