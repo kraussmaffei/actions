@@ -1,266 +1,7 @@
-require('./sourcemap-register.js');module.exports =
-/******/ (() => { // webpackBootstrap
+require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 589:
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __nccwpck_require__) => {
-
-const core = __nccwpck_require__(398);
-const exec = __nccwpck_require__(626);
-const eol = '\n';
-
-const tagPrefix = core.getInput('tag_prefix') || '';
-const namespace = core.getInput('namespace') || '';
-const shortTags = core.getInput('short_tags') === 'true';
-const bumpEachCommit = core.getInput('bump_each_commit') === 'true';
-
-const cmd = async (command, ...args) => {
-  let output = '', errors = '';
-  const options = {
-    silent: true
-  };
-  options.listeners = {
-    stdout: (data) => { output += data.toString(); },
-    stderr: (data) => { errors += data.toString(); },
-    ignoreReturnCode: true,
-    silent: true
-  };
-
-  await exec.exec(command, args, options)
-    .catch(err => { core.info(`The command '${command} ${args.join(' ')}' failed: ${err}`); });
-
-  if (errors !== '') {
-    core.info(`stderr: ${errors}`);
-  }
-
-  return output;
-};
-
-const setOutput = (major, minor, patch, increment, changed, branch, namespace) => {
-  const format = core.getInput('format', { required: true });
-  var version = format
-    .replace('${major}', major)
-    .replace('${minor}', minor)
-    .replace('${patch}', patch)
-    .replace('${increment}', increment);
-
-  if (namespace !== '') {
-    version += `-${namespace}`
-  }
-
-  let tag;
-  if (!shortTags || major === 0 || patch !== 0) {
-    // Always tag pre-release/major version 0 as full version
-    tag = `${tagPrefix}${major}.${minor}.${patch}`;
-  } else if (minor !== 0) {
-    tag = `${tagPrefix}${major}.${minor}`;
-  } else {
-    tag = `${tagPrefix}${major}`;
-  }
-
-  if (namespace !== '') {
-    tag += `-${namespace}`
-  }
-
-  const repository = process.env.GITHUB_REPOSITORY;
-
-  if (!changed) {
-    core.info('No changes detected for this commit');
-  }
-
-  core.info(`Version is ${major}.${minor}.${patch}+${increment}`);
-  if (repository !== undefined && !namespace) {
-    core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${tag}&target=${branch.split('/').reverse()[0]}`);
-  }
-
-  core.setOutput("version", version);
-  core.setOutput("major", major.toString());
-  core.setOutput("minor", minor.toString());
-  core.setOutput("patch", patch.toString());
-  core.setOutput("increment", increment.toString());
-  core.setOutput("changed", changed.toString());
-  core.setOutput("version_tag", tag);
-
-};
-
-const parseVersion = (tag) => {
-
-  console.log(tag);
-  let tagParts = tag.split('/');
-  let versionValues = tagParts[tagParts.length - 1]
-    .substr(tagPrefix.length)
-    .slice(0, namespace === '' ? 999 : -(namespace.length + 1))
-    .split('.');
-
-  let major = parseInt(versionValues[0]);
-  let minor = versionValues.length > 1 ? parseInt(versionValues[1]) : 0;
-  let patch = versionValues.length > 2 ? parseInt(versionValues[2]) : 0;
-
-  if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
-    throw `Invalid tag ${tag} (${versionValues})`;
-  }
-
-  return [major, minor, patch];
-};
-
-const createMatchTest = (pattern) => {
-
-  if (pattern.startsWith('/') && pattern.endsWith('/')) {
-    var regex = new RegExp(pattern.slice(1, -1));
-    return (l) => regex.test(l);
-  } else {
-    return (l) => l.includes(pattern);
-  }
-
-};
-
-async function run() {
-  try {
-    let branch = core.getInput('branch', { required: true });
-    const majorPattern = createMatchTest(core.getInput('major_pattern', { required: true }));
-    const minorPattern = createMatchTest(core.getInput('minor_pattern', { required: true }));
-    const changePath = core.getInput('change_path') || '';
-
-    if (branch === 'HEAD') {
-      branch = (await cmd('git', 'rev-parse', 'HEAD')).trim();
-    }
-
-    const versionPattern = shortTags ? '*[0-9.]' : '*[0-9].*[0-9].*[0-9]'
-    const releasePattern = namespace === '' ? `${tagPrefix}${versionPattern}` : `${tagPrefix}${versionPattern}-${namespace}`;
-    let major = 0, minor = 0, patch = 0, increment = 0;
-    let changed = true;
-
-    let lastCommitAll = (await cmd('git', 'rev-list', '-n1', '--all')).trim();
-
-    if (lastCommitAll === '') {
-      // empty repo
-      setOutput('0', '0', '0', '0', changed, branch, namespace);
-      return;
-    }
-
-    let currentTag = (await cmd(
-      `git tag --points-at ${branch} ${releasePattern}`
-    )).trim();
-
-    let tag = '';
-    try {
-      tag = (await cmd(
-        'git',
-        `describe`,
-        `--tags`,
-        `--abbrev=0`,
-        `--match=${releasePattern}`,
-        `${branch}~1`
-      )).trim();
-    }
-    catch (err) {
-      tag = '';
-    }
-
-    let root;
-    if (tag === '') {
-      if (await cmd('git', 'remote') !== '') {
-        core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
-      }
-      // no release tags yet, use the initial commit as the root
-      root = '';
-    } else {
-      // parse the version tag
-      [major, minor, patch] = parseVersion(tag);
-
-      root = await cmd('git', `merge-base`, tag, branch);
-    }
-    root = root.trim();
-
-    var logCommand = `git log --pretty="%s" --author-date-order ${(root === '' ? branch : `${root}..${branch}`)}`;
-
-    if (changePath !== '') {
-      logCommand += ` -- ${changePath}`;
-    }
-
-    const log = await cmd(logCommand);
-
-    if (changePath !== '') {
-      if (root === '') {
-        const changedFiles = await cmd(`git log --name-only --oneline ${branch} -- ${changePath}`);
-        changed = changedFiles.length > 0;
-      } else {
-        const changedFiles = await cmd(`git diff --name-only ${root}..${branch} -- ${changePath}`);
-        changed = changedFiles.length > 0;
-      }
-    }
-
-    let history = log
-      .trim()
-      .split(eol)
-      .reverse();
-
-    if (bumpEachCommit) {
-      core.info(history)
-      history.forEach(line => {
-        if (currentTag) {
-          [major, minor, patch] = parseVersion(currentTag);
-        } else if (majorPattern(line)) {
-          major += 1;
-          minor = 0;
-          patch = 0;
-        } else if (minorPattern(line)) {
-          minor += 1;
-          patch = 0;
-        } else {
-          patch += 1;
-        }
-      });
-
-      setOutput(major, minor, patch, increment, changed, branch, namespace);
-      return;
-    }
-
-    // Discover the change time from the history log by finding the oldest log
-    // that could set the version.
-
-    const majorIndex = history.findIndex(x => majorPattern(x));
-    const minorIndex = history.findIndex(x => minorPattern(x));
-
-    if (majorIndex !== -1) {
-      increment = history.length - (majorIndex + 1);
-      patch = 0;
-      minor = 0;
-      major++;
-    } else if (minorIndex !== -1) {
-      increment = history.length - (minorIndex + 1);
-      patch = 0;
-      minor++;
-    } else {
-      increment = history.length - 1;
-      patch++;
-    }
-
-    if (currentTag) {
-      let tagVersion = parseVersion(currentTag);
-      if (tagVersion[0] !== major ||
-        tagVersion[1] !== minor ||
-        tagVersion[2] !== patch) {
-        [major, minor, patch] = tagVersion;
-        increment = 0;
-      }
-    }
-
-    setOutput(major, minor, patch, increment, changed, branch, namespace);
-
-  } catch (error) {
-    core.error(error);
-    core.setFailed(error.message);
-  }
-}
-
-run();
-
-
-
-/***/ }),
-
-/***/ 268:
+/***/ 351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -274,7 +15,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const os = __importStar(__nccwpck_require__(87));
-const utils_1 = __nccwpck_require__(685);
+const utils_1 = __nccwpck_require__(278);
 /**
  * Commands
  *
@@ -346,7 +87,7 @@ function escapeProperty(s) {
 
 /***/ }),
 
-/***/ 398:
+/***/ 186:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -368,9 +109,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const command_1 = __nccwpck_require__(268);
-const file_command_1 = __nccwpck_require__(14);
-const utils_1 = __nccwpck_require__(685);
+const command_1 = __nccwpck_require__(351);
+const file_command_1 = __nccwpck_require__(717);
+const utils_1 = __nccwpck_require__(278);
 const os = __importStar(__nccwpck_require__(87));
 const path = __importStar(__nccwpck_require__(622));
 /**
@@ -592,7 +333,7 @@ exports.getState = getState;
 
 /***/ }),
 
-/***/ 14:
+/***/ 717:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -610,7 +351,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__nccwpck_require__(747));
 const os = __importStar(__nccwpck_require__(87));
-const utils_1 = __nccwpck_require__(685);
+const utils_1 = __nccwpck_require__(278);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
     if (!filePath) {
@@ -628,7 +369,7 @@ exports.issueCommand = issueCommand;
 
 /***/ }),
 
-/***/ 685:
+/***/ 278:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -654,7 +395,7 @@ exports.toCommandValue = toCommandValue;
 
 /***/ }),
 
-/***/ 626:
+/***/ 514:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -676,7 +417,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tr = __importStar(__nccwpck_require__(336));
+const tr = __importStar(__nccwpck_require__(159));
 /**
  * Exec a command.
  * Output will be streamed to the live console.
@@ -705,7 +446,7 @@ exports.exec = exec;
 
 /***/ }),
 
-/***/ 336:
+/***/ 159:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -731,8 +472,8 @@ const os = __importStar(__nccwpck_require__(87));
 const events = __importStar(__nccwpck_require__(614));
 const child = __importStar(__nccwpck_require__(129));
 const path = __importStar(__nccwpck_require__(622));
-const io = __importStar(__nccwpck_require__(56));
-const ioUtil = __importStar(__nccwpck_require__(298));
+const io = __importStar(__nccwpck_require__(436));
+const ioUtil = __importStar(__nccwpck_require__(962));
 /* eslint-disable @typescript-eslint/unbound-method */
 const IS_WINDOWS = process.platform === 'win32';
 /*
@@ -1312,7 +1053,7 @@ class ExecState extends events.EventEmitter {
 
 /***/ }),
 
-/***/ 298:
+/***/ 962:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1326,11 +1067,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const assert_1 = __nccwpck_require__(357);
-const fs = __nccwpck_require__(747);
-const path = __nccwpck_require__(622);
+const fs = __importStar(__nccwpck_require__(747));
+const path = __importStar(__nccwpck_require__(622));
 _a = fs.promises, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
 exports.IS_WINDOWS = process.platform === 'win32';
 function exists(fsPath) {
@@ -1514,7 +1262,7 @@ function isUnixExecutable(stats) {
 
 /***/ }),
 
-/***/ 56:
+/***/ 436:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1528,11 +1276,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const childProcess = __nccwpck_require__(129);
-const path = __nccwpck_require__(622);
+const childProcess = __importStar(__nccwpck_require__(129));
+const path = __importStar(__nccwpck_require__(622));
 const util_1 = __nccwpck_require__(669);
-const ioUtil = __nccwpck_require__(298);
+const ioUtil = __importStar(__nccwpck_require__(962));
 const exec = util_1.promisify(childProcess.exec);
 /**
  * Copies a file or folder.
@@ -1700,58 +1455,73 @@ function which(tool, check) {
                     throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.`);
                 }
             }
+            return result;
         }
-        try {
-            // build the list of extensions to try
-            const extensions = [];
-            if (ioUtil.IS_WINDOWS && process.env.PATHEXT) {
-                for (const extension of process.env.PATHEXT.split(path.delimiter)) {
-                    if (extension) {
-                        extensions.push(extension);
-                    }
-                }
-            }
-            // if it's rooted, return it if exists. otherwise return empty.
-            if (ioUtil.isRooted(tool)) {
-                const filePath = yield ioUtil.tryGetExecutablePath(tool, extensions);
-                if (filePath) {
-                    return filePath;
-                }
-                return '';
-            }
-            // if any path separators, return empty
-            if (tool.includes('/') || (ioUtil.IS_WINDOWS && tool.includes('\\'))) {
-                return '';
-            }
-            // build the list of directories
-            //
-            // Note, technically "where" checks the current directory on Windows. From a toolkit perspective,
-            // it feels like we should not do this. Checking the current directory seems like more of a use
-            // case of a shell, and the which() function exposed by the toolkit should strive for consistency
-            // across platforms.
-            const directories = [];
-            if (process.env.PATH) {
-                for (const p of process.env.PATH.split(path.delimiter)) {
-                    if (p) {
-                        directories.push(p);
-                    }
-                }
-            }
-            // return the first match
-            for (const directory of directories) {
-                const filePath = yield ioUtil.tryGetExecutablePath(directory + path.sep + tool, extensions);
-                if (filePath) {
-                    return filePath;
-                }
-            }
-            return '';
+        const matches = yield findInPath(tool);
+        if (matches && matches.length > 0) {
+            return matches[0];
         }
-        catch (err) {
-            throw new Error(`which failed with message ${err.message}`);
-        }
+        return '';
     });
 }
 exports.which = which;
+/**
+ * Returns a list of all occurrences of the given tool on the system path.
+ *
+ * @returns   Promise<string[]>  the paths of the tool
+ */
+function findInPath(tool) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!tool) {
+            throw new Error("parameter 'tool' is required");
+        }
+        // build the list of extensions to try
+        const extensions = [];
+        if (ioUtil.IS_WINDOWS && process.env['PATHEXT']) {
+            for (const extension of process.env['PATHEXT'].split(path.delimiter)) {
+                if (extension) {
+                    extensions.push(extension);
+                }
+            }
+        }
+        // if it's rooted, return it if exists. otherwise return empty.
+        if (ioUtil.isRooted(tool)) {
+            const filePath = yield ioUtil.tryGetExecutablePath(tool, extensions);
+            if (filePath) {
+                return [filePath];
+            }
+            return [];
+        }
+        // if any path separators, return empty
+        if (tool.includes(path.sep)) {
+            return [];
+        }
+        // build the list of directories
+        //
+        // Note, technically "where" checks the current directory on Windows. From a toolkit perspective,
+        // it feels like we should not do this. Checking the current directory seems like more of a use
+        // case of a shell, and the which() function exposed by the toolkit should strive for consistency
+        // across platforms.
+        const directories = [];
+        if (process.env.PATH) {
+            for (const p of process.env.PATH.split(path.delimiter)) {
+                if (p) {
+                    directories.push(p);
+                }
+            }
+        }
+        // find all matches
+        const matches = [];
+        for (const directory of directories) {
+            const filePath = yield ioUtil.tryGetExecutablePath(path.join(directory, tool), extensions);
+            if (filePath) {
+                matches.push(filePath);
+            }
+        }
+        return matches;
+    });
+}
+exports.findInPath = findInPath;
 function readCopyOptions(options) {
     const force = options.force == null ? true : options.force;
     const recursive = Boolean(options.recursive);
@@ -1875,8 +1645,9 @@ module.exports = require("util");;
 /******/ 	// The require function
 /******/ 	function __nccwpck_require__(moduleId) {
 /******/ 		// Check if module is in cache
-/******/ 		if(__webpack_module_cache__[moduleId]) {
-/******/ 			return __webpack_module_cache__[moduleId].exports;
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
@@ -1901,11 +1672,265 @@ module.exports = require("util");;
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
-/******/ 	__nccwpck_require__.ab = __dirname + "/";/************************************************************************/
-/******/ 	// module exports must be returned from runtime so entry inlining is disabled
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	return __nccwpck_require__(589);
+/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+const core = __nccwpck_require__(186);
+const exec = __nccwpck_require__(514);
+const eol = '\n';
+
+const tagPrefix = core.getInput('tag_prefix') || '';
+const namespace = core.getInput('namespace') || '';
+const shortTags = core.getInput('short_tags') === 'true';
+const bumpEachCommit = core.getInput('bump_each_commit') === 'true';
+
+const cmd = async (command, ...args) => {
+  let output = '', errors = '';
+  const options = {
+    silent: true
+  };
+  options.listeners = {
+    stdout: (data) => { output += data.toString(); },
+    stderr: (data) => { errors += data.toString(); },
+    ignoreReturnCode: true,
+    silent: true
+  };
+
+  await exec.exec(command, args, options)
+    .catch(err => { core.info(`The command '${command} ${args.join(' ')}' failed: ${err}`); });
+
+  if (errors !== '') {
+    core.info(`stderr: ${errors}`);
+  }
+
+  return output;
+};
+
+const setOutput = (major, minor, patch, increment, changed, branch, namespace) => {
+  const format = core.getInput('format', { required: true });
+  var version = format
+    .replace('${major}', major)
+    .replace('${minor}', minor)
+    .replace('${patch}', patch)
+    .replace('${increment}', increment);
+
+  if (namespace !== '') {
+    version += `-${namespace}`
+  }
+
+  let tag;
+  if (!shortTags || major === 0 || patch !== 0) {
+    // Always tag pre-release/major version 0 as full version
+    tag = `${tagPrefix}${major}.${minor}.${patch}`;
+  } else if (minor !== 0) {
+    tag = `${tagPrefix}${major}.${minor}`;
+  } else {
+    tag = `${tagPrefix}${major}`;
+  }
+
+  if (namespace !== '') {
+    tag += `-${namespace}`
+  }
+
+  const repository = process.env.GITHUB_REPOSITORY;
+
+  if (!changed) {
+    core.info('No changes detected for this commit');
+  }
+
+  core.info(`Version is ${major}.${minor}.${patch}+${increment}`);
+  if (repository !== undefined && !namespace) {
+    core.info(`To create a release for this version, go to https://github.com/${repository}/releases/new?tag=${tag}&target=${branch.split('/').reverse()[0]}`);
+  }
+
+  core.setOutput("version", version);
+  core.setOutput("major", major.toString());
+  core.setOutput("minor", minor.toString());
+  core.setOutput("patch", patch.toString());
+  core.setOutput("increment", increment.toString());
+  core.setOutput("changed", changed.toString());
+  core.setOutput("version_tag", tag);
+
+};
+
+const parseVersion = (tag) => {
+
+  console.log(tag);
+  let tagParts = tag.split('/');
+  let versionValues = tagParts[tagParts.length - 1]
+    .substr(tagPrefix.length)
+    .slice(0, namespace === '' ? 999 : -(namespace.length + 1))
+    .split('.');
+
+  let major = parseInt(versionValues[0]);
+  let minor = versionValues.length > 1 ? parseInt(versionValues[1]) : 0;
+  let patch = versionValues.length > 2 ? parseInt(versionValues[2]) : 0;
+
+  if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
+    throw `Invalid tag ${tag} (${versionValues})`;
+  }
+
+  return [major, minor, patch];
+};
+
+const createMatchTest = (pattern) => {
+
+  if (pattern.startsWith('/') && pattern.endsWith('/')) {
+    var regex = new RegExp(pattern.slice(1, -1));
+    return (l) => regex.test(l);
+  } else {
+    return (l) => l.includes(pattern);
+  }
+
+};
+
+async function run() {
+  try {
+    let branch = core.getInput('branch', { required: true });
+    const majorPattern = createMatchTest(core.getInput('major_pattern', { required: true }));
+    const minorPattern = createMatchTest(core.getInput('minor_pattern', { required: true }));
+    const changePath = core.getInput('change_path') || '';
+
+    if (branch === 'HEAD') {
+      branch = (await cmd('git', 'rev-parse', 'HEAD')).trim();
+    }
+
+    const versionPattern = shortTags ? '*[0-9.]' : '*[0-9].*[0-9].*[0-9]'
+    const releasePattern = namespace === '' ? `${tagPrefix}${versionPattern}` : `${tagPrefix}${versionPattern}-${namespace}`;
+    let major = 0, minor = 0, patch = 0, increment = 0;
+    let changed = true;
+
+    let lastCommitAll = (await cmd('git', 'rev-list', '-n1', '--all')).trim();
+
+    if (lastCommitAll === '') {
+      // empty repo
+      setOutput('0', '0', '0', '0', changed, branch, namespace);
+      return;
+    }
+
+    let currentTag = (await cmd(
+      `git tag --points-at ${branch} ${releasePattern}`
+    )).trim();
+
+    let tag = '';
+    try {
+      tag = (await cmd(
+        'git',
+        `describe`,
+        `--tags`,
+        `--abbrev=0`,
+        `--match=${releasePattern}`,
+        `${branch}~1`
+      )).trim();
+    }
+    catch (err) {
+      tag = '';
+    }
+
+    let root;
+    if (tag === '') {
+      if (await cmd('git', 'remote') !== '') {
+        core.warning('No tags are present for this repository. If this is unexpected, check to ensure that tags have been pulled from the remote.');
+      }
+      // no release tags yet, use the initial commit as the root
+      root = '';
+    } else {
+      // parse the version tag
+      [major, minor, patch] = parseVersion(tag);
+
+      root = await cmd('git', `merge-base`, tag, branch);
+    }
+    root = root.trim();
+
+    var logCommand = `git log --pretty="%s" --author-date-order ${(root === '' ? branch : `${root}..${branch}`)}`;
+
+    if (changePath !== '') {
+      logCommand += ` -- ${changePath}`;
+    }
+
+    const log = await cmd(logCommand);
+
+    if (changePath !== '') {
+      if (root === '') {
+        const changedFiles = await cmd(`git log --name-only --oneline ${branch} -- ${changePath}`);
+        changed = changedFiles.length > 0;
+      } else {
+        const changedFiles = await cmd(`git diff --name-only ${root}..${branch} -- ${changePath}`);
+        changed = changedFiles.length > 0;
+      }
+    }
+
+    let history = log
+      .trim()
+      .split(eol)
+      .reverse();
+
+    if (bumpEachCommit) {
+      core.info(history)
+      history.forEach(line => {
+        if (currentTag) {
+          [major, minor, patch] = parseVersion(currentTag);
+        } else if (majorPattern(line)) {
+          major += 1;
+          minor = 0;
+          patch = 0;
+        } else if (minorPattern(line)) {
+          minor += 1;
+          patch = 0;
+        } else {
+          patch += 1;
+        }
+      });
+
+      setOutput(major, minor, patch, increment, changed, branch, namespace);
+      return;
+    }
+
+    // Discover the change time from the history log by finding the oldest log
+    // that could set the version.
+
+    const majorIndex = history.findIndex(x => majorPattern(x));
+    const minorIndex = history.findIndex(x => minorPattern(x));
+
+    if (majorIndex !== -1) {
+      increment = history.length - (majorIndex + 1);
+      patch = 0;
+      minor = 0;
+      major++;
+    } else if (minorIndex !== -1) {
+      increment = history.length - (minorIndex + 1);
+      patch = 0;
+      minor++;
+    } else {
+      increment = history.length - 1;
+      patch++;
+    }
+
+    if (currentTag) {
+      let tagVersion = parseVersion(currentTag);
+      if (tagVersion[0] !== major ||
+        tagVersion[1] !== minor ||
+        tagVersion[2] !== patch) {
+        [major, minor, patch] = tagVersion;
+        increment = 0;
+      }
+    }
+
+    setOutput(major, minor, patch, increment, changed, branch, namespace);
+
+  } catch (error) {
+    core.error(error);
+    core.setFailed(error.message);
+  }
+}
+
+run();
+
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
