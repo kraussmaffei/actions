@@ -11,6 +11,9 @@ async function run() {
     var path;
     var artifacts;
     var workspace;
+    var owner;
+    var repo;
+    var archiveFormat;
 
     if (github.context.workflow) {
       // get inputs - running in a workflow
