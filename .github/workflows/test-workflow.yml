@@ -105,4 +105,14 @@ jobs:
       - name: Run Action
         uses: ./
         id: run
-
+  download-artifact:
+    name: Run local download artifact
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download Artifact
+        uses: ./download-artifact
+        with:
+          workflow-run-id: ${{ github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}

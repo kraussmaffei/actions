@@ -17,13 +17,15 @@ jobs:
       matrix:
         actions:
           [
-            "ssh-agent",
-            "create-deployment",
-            "remove-deployment",
             "configure-aws-credentials",
-            "json-property",
+            "create-deployment",
+            "create-deployment-status",
             "create-workflow-dispatch",
-            "semantic-version"
+            "download-artifact",
+            "json-property",
+            "remove-deployment",
+            "semantic-version",
+            "ssh-agent"
           ]
     steps:
       - name: Checkout
