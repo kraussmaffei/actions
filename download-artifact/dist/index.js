@@ -6104,6 +6104,7 @@ async function run() {
     var owner;
     var repo;
     var archiveFormat;
+    var deleteArtifact;
 
     if (github.context.workflow) {
       // get inputs - running in a workflow
@@ -6111,6 +6112,7 @@ async function run() {
       workflowRunId = core.getInput("workflow-run-id", { required: true });
       archiveFormat = core.getInput("archive-format", { required: false })
       githubToken = core.getInput("github-token", { required: false });
+      deleteArtifact = core.getInput("delete-artifact", { required: false });
       path = core.getInput("path", { required: false }) || "";
       core.debug(`Workflowrun Id: ${workflowRunId}`)
       core.debug(`Archive Format: ${archiveFormat}`)
@@ -6176,6 +6178,14 @@ async function run() {
             fs.writeFileSync(filename, Buffer.from(response.data));
           }
         });
+      // Delete artifact when it is saved
+      if (deleteArtifact) {
+        await octokit.request('DELETE /repos/{owner}/{repo}/actions/artifacts/{artifact_id}', {
+          owner: owner,
+          repo: repo,
+          artifact_id: artifact.id
+        })
+      }
     }));
   } catch (error) {
     core.setFailed(error.message);
