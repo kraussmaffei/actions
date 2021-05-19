@@ -15,6 +15,7 @@ steps:
   with:
     workflow-run-id: ${{ github.event.deployment.payload.workflow-run-id }}
     artifact-name: your-artifact-name
+    github-token: ${{ secrets.GITHUB_TOKEN }}
 
 - name: Display structure of downloaded files
   run: ls -R
@@ -28,6 +29,7 @@ steps:
     workflow-run-id: ${{ github.event.deployment.payload.workflow-run-id }}
     artifact-name: your-artifact-name
     path: /path/to/artifact
+    github-token: ${{ secrets.GITHUB_TOKEN }}
 
 - name: Display structure of downloaded files
   run: ls -R
@@ -42,6 +44,7 @@ steps:
 - uses: kraussmaffei/actions/download-artifact-from-workflow@main
   with:
     workflow-run-id: ${{ github.event.deployment.payload.workflow-run-id }}
+    github-token: ${{ secrets.GITHUB_TOKEN }}
 
 - name: Display structure of downloaded files
   run: ls -R
@@ -54,6 +57,7 @@ steps:
   with:
     workflow-run-id: ${{ github.event.deployment.payload.workflow-run-id }}
     path: /path/to/artifact
+    github-token: ${{ secrets.GITHUB_TOKEN }}
 
 - name: Display structure of downloaded files
   run: ls -R

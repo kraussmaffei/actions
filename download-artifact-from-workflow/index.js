@@ -25,6 +25,7 @@ async function run() {
     var owner;
     var repo;
     var archiveFormat;
+    var githubToken;
 
     if (github.context.workflow) {
       // get inputs - running in a workflow
@@ -33,6 +34,7 @@ async function run() {
       artifactName = core.getInput("artifact-name", { required: false });
       archiveFormat = core.getInput("archive-format", { required: false })
       path = core.getInput("path", { required: false }) || "";
+      githubToken = core.getInput("github-token", { required: true });
       core.debug(`Workflowrun Id: ${workflowRunId}`)
       core.debug(`Archive Format: ${archiveFormat}`)
       core.debug(`Path: ${path}`)
@@ -42,7 +44,7 @@ async function run() {
       owner = github.context.repo.owner;
       repo = github.context.repo.repo;
       workspace = github.context.workspace || "~";
-
+      
       core.debug(`Owner: ${owner}`)
       core.debug(`Repo: ${repo}`)
       core.debug(`Workspace: ${workspace}`)
@@ -57,10 +59,11 @@ async function run() {
       archiveFormat = process.env["archive-format"]
       workspace = process.cwd();
       path = "/my-path";
+      githubToken = process.env["github-token"];
     }
 
     core.debug('Setting up octokit')
-    const octokit = github.getOctokit(process.env["GITHUB_TOKEN"]);
+    const octokit = github.getOctokit(githubToken);
 
     try {
       // List all artifacts of given workflow run
@@ -83,13 +86,12 @@ async function run() {
       core.debug(`Found ${artifacts.data.total_count}`)
     }
 
-    var artifact;
     if (artifactName) {
-      artifact = artifacts.data.artifacts.find(element => element.name === artifactName);
+      // Download artifact
+      let artifact = artifacts.data.artifacts.find(element => element.name === artifactName);
       await downloadAndExtractArtifact(octokit, owner, repo, artifact, archiveFormat, workspace, path)
     }
     else {
-      // TODO: Test this
       // Download all artifacts
       await Promise.all(artifacts.data.artifacts.map(async (artifact) => {
         await downloadAndExtractArtifact(octokit, owner, repo, artifact, archiveFormat, workspace, path)
