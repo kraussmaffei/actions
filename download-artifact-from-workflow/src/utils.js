@@ -26,24 +26,27 @@ const downloadArtifact = async function (octokit, owner, repo, artifact, archive
 }
 
 const saveArtifact = function (basePath, artifact) {
-    const zipPath = pathModule.join(basePath, artifact["Name"])
+    const zipPath = pathModule.join(basePath, artifact["Name"]);
+    const zipPathAbsolute = pathModule.resolve(zipPath);
     const zipFilePath = pathModule.join(zipPath, artifact["FileName"]);
-    core.info(`Saving artifact ${artifact["FileName"]} to ${zipFilePath}`)
+    const zipFilePathAbsolute = pathModule.resolve(zipFilePath);
+    core.info(`Saving artifact ${artifact["FileName"]} to ${zipFilePathAbsolute}`);
 
-    if (!fs.existsSync(zipPath)) {
-        fs.mkdirSync(zipPath, { recursive: true });
+    if (!fs.existsSync(zipPathAbsolute)) {
+        fs.mkdirSync(zipPathAbsolute, { recursive: true });
     }
-    fs.writeFileSync(zipFilePath, Buffer.from(artifact["Data"]));
+    fs.writeFileSync(zipFilePathAbsolute, Buffer.from(artifact["Data"]));
 
-    return zipFilePath;
+    return zipFilePathAbsolute;
 }
 
 const extractArtifactTo = function (source) {
-    var zip = new AdmZip(source);
-    var targetPath = pathModule.dirname(source);
+    var sourceAbsolute = pathModule.resolve(source);
+    var zip = new AdmZip(sourceAbsolute);
+    var targetPathAbsolute = pathModule.dirname(sourceAbsolute);
 
-    core.info(`Extracting artifact ${source} to ${targetPath}`)
-    zip.extractAllTo(targetPath, true);
+    core.info(`Extracting artifact ${source} to ${targetPathAbsolute}`)
+    zip.extractAllTo(targetPathAbsolute, true);
 };
 
 exports.downloadArtifact = downloadArtifact;

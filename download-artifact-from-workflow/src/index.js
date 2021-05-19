@@ -43,12 +43,10 @@ async function run() {
       core.debug('Setting context variables')
       owner = github.context.repo.owner;
       repo = github.context.repo.repo;
-      workspace = github.context.workspace || "~";
       
       core.debug(`Owner: ${owner}`)
       core.debug(`Repo: ${repo}`)
       core.debug(`Workspace: ${workspace}`)
-
     }
     else {
       // get env variables - running locally on dev machine
@@ -61,6 +59,7 @@ async function run() {
       path = "/my-path";
       githubToken = process.env["github-token"];
     }
+    workspace = process.env["GITHUB_WORKSPACE"];
 
     core.debug('Setting up octokit')
     const octokit = github.getOctokit(githubToken);
