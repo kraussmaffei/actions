@@ -21,7 +21,7 @@ jobs:
             "create-deployment",
             "create-deployment-status",
             "create-workflow-dispatch",
-            "download-artifact",
+            "download-artifact-from-workflow",
             "json-property",
             "remove-deployment",
             "semantic-version",
