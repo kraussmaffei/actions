@@ -8893,7 +8893,7 @@ async function run() {
       return;
     }
     else {
-      core.debug(`Found ${artifacts.data.total_count}`)
+      core.debug(`Found ${artifacts.data.total_count} artifacts.`)
     }
 
     if (artifactName) {
