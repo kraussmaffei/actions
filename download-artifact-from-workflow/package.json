@@ -4,8 +4,8 @@
   "description": "JavaScript Action Template",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint .",
-    "package": "ncc build index.js -o dist --source-map --license licenses.txt"
+    "lint": "eslint src/*.js",
+    "package": "ncc build src/index.js -o dist --source-map --license licenses.txt"
   },
   "repository": {
     "type": "git",

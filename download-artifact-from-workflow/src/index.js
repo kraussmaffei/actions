@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const pathModule = require('path');
-const { downloadArtifact, saveArtifact, extractArtifactTo } = require('./src/utils');
+const { downloadArtifact, saveArtifact, extractArtifactTo } = require('./utils');
 
 async function downloadAndExtractArtifact(octokit, owner, repo, artifact, archiveFormat, workspace, path) {
   // Download the given artifact name
