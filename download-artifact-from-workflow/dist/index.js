@@ -8826,6 +8826,7 @@ async function downloadAndExtractArtifact(octokit, owner, repo, artifact, archiv
 async function run() {
   try {
     var workflowRunId;
+    var artifactName;
     var path;
     var artifacts;
     var workspace;
@@ -8839,7 +8840,6 @@ async function run() {
       workflowRunId = core.getInput("workflow-run-id", { required: true });
       artifactName = core.getInput("artifact-name", { required: false });
       archiveFormat = core.getInput("archive-format", { required: false })
-      deleteArtifact = core.getInput("delete-artifact", { required: false });
       path = core.getInput("path", { required: false }) || "";
       core.debug(`Workflowrun Id: ${workflowRunId}`)
       core.debug(`Archive Format: ${archiveFormat}`)
@@ -8891,6 +8891,7 @@ async function run() {
       core.debug(`Found ${artifacts.data.total_count}`)
     }
 
+    var artifact;
     if (artifactName) {
       artifact = artifacts.data.artifacts.find(element => element.name === artifactName);
       await downloadAndExtractArtifact(octokit, owner, repo, artifact, archiveFormat, workspace, path)
