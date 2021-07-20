@@ -1,0 +1,19 @@
+name: 'Andreas Federmann'
+description: 'This action checks the commit messages if they are conventional commit compliant'
+author: 'KraussMaffei Technologies GmbH'
+inputs:
+  access-token:
+    required: true
+    description: 'The GITHUB_ACCESS_TOKEN, see https://docs.github.com/en/actions/reference/authentication-in-a-workflow#using-the-github_token-in-a-workflow. Ensure that the token has read permissions to your pull_requests.'
+  compliance-rule:
+    required: false
+    default: 'latest'
+    description: 'Rule of how many commit messages must comply the conventional commit rules. Possible values are "latest" | "at-least-once" | "all"'
+  fail-on-error:
+    required: false
+    description: 'Indicates if workflow shall fail if commit does not comply'
+    default: "true"
+  
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

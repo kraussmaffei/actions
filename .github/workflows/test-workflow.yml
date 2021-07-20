@@ -105,4 +105,11 @@ jobs:
       - name: Run Action
         uses: ./
         id: run
-
+  conventional-commits-checker:
+    name: Run conventional-commits-checker
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Package
+        run: npm run all

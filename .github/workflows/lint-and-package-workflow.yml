@@ -23,14 +23,18 @@ jobs:
             "configure-aws-credentials",
             "json-property",
             "create-workflow-dispatch",
-            "semantic-version"
+            "semantic-version",
+            "conventional-commits-checker"
           ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
       - name: Package
         run: |
           cd ${{ matrix.actions }}
-          npm ci
+          npm install -f --save-optional
           npm run lint
           npm run package
