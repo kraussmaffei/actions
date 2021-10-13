@@ -91,4 +91,4 @@ runs:
         git config --global user.email ${{ inputs.git-email }}
 
         # semantic-release publish
-        echo "::set-output name=published-release-version::$(semantic-release publish print-version --current)"
+        echo "::set-output name=published-release-version::$(semantic-release print-version --current)"
