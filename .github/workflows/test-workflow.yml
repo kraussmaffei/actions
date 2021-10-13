@@ -105,8 +105,8 @@ jobs:
       - name: Run Action
         uses: ./
         id: run
-  conventional-commits-checker:
-    name: Run conventional-commits-checker
+  conventional-commits-linter:
+    name: Run conventional-commits-linter
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout

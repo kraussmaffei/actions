@@ -24,7 +24,7 @@ jobs:
             "json-property",
             "create-workflow-dispatch",
             "semantic-version",
-            "conventional-commits-checker"
+            "conventional-commits-linter"
           ]
     steps:
       - name: Checkout

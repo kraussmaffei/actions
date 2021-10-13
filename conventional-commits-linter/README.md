@@ -1,4 +1,4 @@
-# Conventional Commits Checker
+# Conventional Commits Linter Action
 This action uses the conventional commits parser from https://github.com/conventional-commits/parser to check commit messages to comply.
 
 ## Usage

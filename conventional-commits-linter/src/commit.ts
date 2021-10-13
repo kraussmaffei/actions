@@ -1,4 +1,5 @@
-import { parser } from '@conventional-commits/parser'
+import * as lint from '@commitlint/lint'
+import '@commitlint/config-angular'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { Commit, PullRequest, PushEvent } from '@octokit/webhooks-types'
@@ -32,17 +33,21 @@ export async function getCommits(accessToken: string): Promise<Commit[]> {
   return commits
 }
 
-export function checkCommitMessage(commitMessage: string | undefined): boolean {
+export async function checkCommitMessage(
+  commitMessage: string | undefined
+): Promise<boolean> {
   if (commitMessage === undefined) {
     return false
   }
-  try {
-    core.info(`Checking commit message: ${commitMessage}`)
-    parser(commitMessage)
+  const linter = lint.default
+  core.info(`Checking commit message: ${commitMessage}`)
+  const result = await linter(commitMessage)
+
+  if (result.valid === true) {
     core.info(`--> Commit message is compliant!`)
-  } catch (error) {
+  } else {
     core.info(`--> Commit message is not compliant!`)
-    return false
   }
-  return true
+
+  return result.valid
 }

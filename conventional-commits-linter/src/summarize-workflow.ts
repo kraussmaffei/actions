@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 
 export function summarizeWorkflow(
-  resultExpression: () => boolean,
+  resultExpression: () => Promise<boolean>,
   failOnError: boolean
 ): void {
   if (!resultExpression()) {

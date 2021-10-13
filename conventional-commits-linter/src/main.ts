@@ -28,7 +28,7 @@ async function run(): Promise<void> {
           const latestCommit = sortedCommits[sortedCommits.length - 1]
 
           summarizeWorkflow(
-            () => checkCommitMessage(latestCommit?.message),
+            async () => await checkCommitMessage(latestCommit?.message),
             failOnError
           )
         }
@@ -39,10 +39,10 @@ async function run(): Promise<void> {
           core.info(`Checking if at least one commit message is compliant.`)
 
           const result = commits.filter(
-            (commit: { message: string | undefined }) =>
+            async (commit: { message: string | undefined }) =>
               checkCommitMessage(commit.message)
           )
-          summarizeWorkflow(() => result.length > 0, failOnError)
+          summarizeWorkflow(async () => result.length > 0, failOnError)
         }
         break
 
@@ -51,10 +51,13 @@ async function run(): Promise<void> {
           core.info(`Checking all commit messages for compliance.`)
 
           const result = commits.filter(
-            (commit: { message: string | undefined }) =>
+            async (commit: { message: string | undefined }) =>
               checkCommitMessage(commit.message)
           )
-          summarizeWorkflow(() => result.length === commits.length, failOnError)
+          summarizeWorkflow(
+            async () => result.length === commits.length,
+            failOnError
+          )
         }
         break
 

@@ -129,4 +129,4 @@ Pipfile.lock
 !configure-aws-credentials/dist
 !json-property/dist
 !create-workflow-dispatch/dist
-!conventional-commits-checker/dist
+!conventional-commits-linter/dist

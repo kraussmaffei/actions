@@ -5,34 +5,34 @@ import * as path from 'path'
 import { expect, test } from '@jest/globals'
 import fs from 'fs'
 
-test('validate feat commit message', () => {
+test('validate feat commit message', async () => {
   const input = 'feat: My cool new feature'
-  const result = checkCommitMessage(input)
+  const result = await checkCommitMessage(input)
   expect(result).toBe(true)
 })
 
-test('validate patch commit message', () => {
+test('validate patch commit message', async () => {
   const input = 'patch: My cool new feature'
-  const result = checkCommitMessage(input)
+  const result = await checkCommitMessage(input)
   expect(result).toBe(true)
 })
 
-test('validate breaking change commit message', () => {
+test('validate breaking change commit message', async () => {
   const input =
     'feat: My cool new feature\nLet me tell you something\n\nBREAKING CHANGE: Sorry for that breaking change.\n'
-  const result = checkCommitMessage(input)
+  const result = await checkCommitMessage(input)
   expect(result).toBe(true)
 })
 
-test('validate incorrect commit message', () => {
+test('validate incorrect commit message', async () => {
   const input = 'My cool new feature'
-  const result = checkCommitMessage(input)
+  const result = await checkCommitMessage(input)
   expect(result).toBe(false)
 })
 
-test('validate undefined commit message', () => {
+test('validate undefined commit message', async () => {
   const input = undefined
-  const result = checkCommitMessage(input)
+  const result = await checkCommitMessage(input)
   expect(result).toBe(false)
 })
 
