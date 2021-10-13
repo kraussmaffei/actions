@@ -68,7 +68,6 @@ runs:
         # ----------------------------------------------------------------------------- #
 
         echo Configuring pip...
-        pip config unset global.index-url
 
         pip config set global.index-url \
         https://aws:$CODEARTIFACT_AUTH_TOKEN@${{ inputs.codeartifact-domain }}-${{ inputs.codeartifact-domain-owner }} \
