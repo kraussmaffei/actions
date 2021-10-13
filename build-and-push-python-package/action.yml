@@ -13,6 +13,15 @@ inputs:
   codeartifact-upstream-repository:
     description: "The aws codeartifact upstream repository."
     required: true
+  git-user:
+    description: "Git user to use for pushing the release on git."
+    required: true
+  git-email:
+    description: "Git email to use for pushing the release on git."
+    required: true
+  gh-token:
+    description: "The token to be used by python-semantic-release"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -23,6 +32,8 @@ runs:
 
     - name: Build and publish python package...
       shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
       run: |
         echo Logging in to codeartifact...
         CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token \
@@ -68,7 +79,7 @@ runs:
         # ----------------------------------------------------------------------------- #
 
         echo Configuring git...
-        git config --global user.name 'km-machine-user'
-        git config --global user.email 'km.machine.user@gmx.de'
+        git config --global user.name ${{ inputs.git-user }}
+        git config --global user.email ${{ inputs.git-email }}
 
         # "semantic-release publish"
