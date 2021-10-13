@@ -70,12 +70,12 @@ runs:
         echo Configuring pip...
 
         pip config set global.index-url \
-        https://aws:$CODEARTIFACT_AUTH_TOKEN@${{ inputs.codeartifact-domain }}-${{ inputs.codeartifact-domain-owner }} \
-          .d.codeartifact.${{ inputs.codartifact-region }}.amazonaws.com/pypi/${{ inputs.codeartifact-repository }}/simple/
+          "https://aws:$CODEARTIFACT_AUTH_TOKEN@${{ inputs.codeartifact-domain }}-${{ inputs.codeartifact-domain-owner }} \
+            .d.codeartifact.${{ inputs.codartifact-region }}.amazonaws.com/pypi/${{ inputs.codeartifact-repository }}/simple/"
 
         pip config set global.extra-index-url \
-        https://aws:$CODEARTIFACT_AUTH_TOKEN@${{ inputs.codeartifact-domain }}-${{ inputs.codeartifact-domain-owner }} \
-          .d.codeartifact.${{ inputs.codartifact-region }}.amazonaws.com/pypi/${{ inputs.codeartifact-upstream-repository }}/simple/
+          "https://aws:$CODEARTIFACT_AUTH_TOKEN@${{ inputs.codeartifact-domain }}-${{ inputs.codeartifact-domain-owner }} \
+            .d.codeartifact.${{ inputs.codartifact-region }}.amazonaws.com/pypi/${{ inputs.codeartifact-upstream-repository }}/simple/"
 
         # ----------------------------------------------------------------------------- #
 
