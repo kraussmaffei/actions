@@ -1,15 +1,6 @@
 name: "Build and Push Python Package"
 description: "Builds and pushes a python package from the given source. The package will be pushed to codeartifact"
 inputs:
-  aws-access-key-id:
-    description: "Path of the python package under quality test."
-    required: true
-  aws-secret-access-key:
-    description: "Path of the python package under quality test."
-    required: true
-  aws-region:
-    description: "Region of the aws account"
-    required: true
   codeartifact-domain:
     description: "Domain of the aws codeartifact repository."
     required: true
@@ -22,10 +13,6 @@ inputs:
   codeartifact-upstream-repository:
     description: "The aws codeartifact upstream repository."
     required: true
-# outputs:
-#   total-test-coverage:
-#     description: "The total test coverage of the python project"
-#     value: ${{ steps.coverage-calculator.outputs.total-coverage }}
 runs:
   using: "composite"
   steps:
@@ -36,9 +23,6 @@ runs:
 
     - name: Build and publish python package...
       shell: bash
-      env:
-        AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
-        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
       run: |
         echo Logging in to codeartifact...
         CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token \
