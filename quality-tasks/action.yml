@@ -1,16 +1,72 @@
 name: 'Run quality tasks'
 description: 'Runs all the necessary quality task for a given python project.'
 inputs:
+  aws-access-key-id:
+    description: "The aws access key id used for login."
+    required: true
+  aws-secret-access-key:
+    description: "The aws secret access key used for login."
+    required: true
+  aws-account-id:
+    description: "The aws account id used for login."
+    required: true
+  role-external-id:
+    description: "The external ID of the role to assume."
+    required: true
+  role-to-assume:
+    description: "The role to assume."
+    required: true
+  aws-region:
+    description: "AWS region of the codeartifact domain."
+    required: true
+  codeartifact-domain:
+    description: "Domain of the aws codeartifact repository."
+    required: true
+  codeartifact-repository:
+    description: "The aws codeartifact repository."
+    required: true
   python-package-path:
     description: 'Path of the python package under quality test.'
     required: true
-outputs:
-  total-test-coverage:
-    description: "The total test coverage of the python project"
-    value: ${{ steps.coverage-calculator.outputs.total-coverage }}
+  python-version:
+    description: "The python version to use for executing the quality tasks."
+    required: false
+    default: "3.8"
+  badge-uploader-api-key:
+    description: "The api key for the badge uploader to use."
+    required: true
+  badge-uploader-api-url:
+    description: "The url for the badge uploader to use."
+    required: true
+
 runs:
   using: "composite"
   steps:
+    - name: "Setup Python"
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: "Configure AWS Credentials"
+      uses: kraussmaffei/actions/configure-aws-credentials@main
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        role-to-assume: ${{ inputs.role-to-assume }}
+        role-external-id: ${{ inputs.role-external-id }}
+        role-skip-session-tagging: true
+        mask-aws-account-id: false
+        aws-region: ${{ inputs.aws-region }}
+
+    - name: "CodeArtifact login (pip)"
+      uses: kraussmaffei/aws-tools-login@main
+      with:
+        account: ${{ inputs.aws-account-id }}
+        region: ${{ inputs.aws-region }}
+        aws-tool: "codeartifact-pip"
+        codeartifact-domain: ${{ inputs.codeartifact-domain }}
+        codeartifact-repository: ${{ inputs.codeartifact-repository }}
+
     - name: Install required tools
       shell: bash
       run: |
@@ -32,3 +88,15 @@ runs:
       run: |
         coverage run --source=${{ inputs.python-package-path }} -m unittest discover -s tests -p 'test*.py'
         echo "::set-output name=total-coverage::$(coverage report -m | grep -o -E 'TOTAL.+ ([0-9]{1,3}%)' | grep -o -E '([0-9]{1,3}%)' | grep -o -E '([0-9]+)')"
+
+    - name: "Push coverage"
+      id: git-badge-uploader
+      uses: kraussmaffei/git-badge-uploader@main
+      with:
+        total-coverage: ${{ steps.coverage-calculator.outputs.total-coverage }}
+        aws-api-key: ${{ inputs.badge-uploader-api-key }}
+        aws-api-url: ${{ inputs.badge-uploader-api-url }}
+
+    - name: "Coverage url"
+      shell: bash
+      run: echo ${{ steps.git-badge-uploader.outputs.url }}
