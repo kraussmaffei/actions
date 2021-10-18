@@ -33,16 +33,9 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Install required tools
-      shell: bash
-      run: |
-        pip install python-semantic-release poetry
-
-    - name: Build and publish python package...
+    - name: Configuring environment...
       id: build-and-push
       shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.gh-token }}
       run: |
         echo Logging in to codeartifact...
         CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token \
@@ -90,5 +83,16 @@ runs:
         git config --global user.name ${{ inputs.git-user }}
         git config --global user.email ${{ inputs.git-email }}
 
+    - name: Install required tools
+      shell: bash
+      run: |
+        pip install python-semantic-release poetry
+
+    - name: Build and publish python package...
+      id: build-and-push
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+      run: |
         echo "::set-output name=published-release-version::$(semantic-release print-version)"
         semantic-release publish
