@@ -1,0 +1,87 @@
+name: "Build and Push Python Package"
+description: "Builds and pushes a python package from the given source. The package will be pushed to codeartifact"
+inputs:
+  codartifact-region:
+    description: "AWS region of the codeartifact domain."
+    required: true
+  codeartifact-domain:
+    description: "Domain of the aws codeartifact repository."
+    required: true
+  codeartifact-domain-owner:
+    description: "The account id of the owner of the domain."
+    required: true
+  codeartifact-repository:
+    description: "The aws codeartifact repository."
+    required: true
+  codeartifact-upstream-repository:
+    description: "The aws codeartifact upstream repository."
+    required: true
+  git-user:
+    description: "Git user to use for pushing the release on git."
+    required: true
+  git-email:
+    description: "Git email to use for pushing the release on git."
+    required: true
+  gh-token:
+    description: "The token to be used by python-semantic-release"
+    required: true
+outputs:
+  published-release-version:
+    description: "The version number which was released. Empty if no version was released."
+    value: ${{ steps.build-and-push.outputs.total-coverage }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build and publish python package...
+      id: build-and-push
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+      run: |
+        echo Logging in to codeartifact...
+        CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token \
+          --domain ${{ inputs.codeartifact-domain }} \
+          --domain-owner ${{ inputs.codeartifact-domain-owner }} \
+          --query authorizationToken \
+          --output text)
+
+        INDEX_URL=$(aws codeartifact get-repository-endpoint \
+          --domain ${{ inputs.codeartifact-domain }} \
+          --domain-owner ${{ inputs.codeartifact-domain-owner }} \
+          --repository ${{ inputs.codeartifact-repository }} \
+          --format pypi --query repositoryEndpoint \
+          --output text)
+
+        EXTRA_INDEX_URL=$(aws codeartifact get-repository-endpoint \
+          --domain ${{ inputs.codeartifact-domain }} \
+          --domain-owner ${{ inputs.codeartifact-domain-owner }} \
+          --repository ${{ inputs.codeartifact-upstream-repository }} \
+          --format pypi --query repositoryEndpoint \
+          --output text)
+
+        # ----------------------------------------------------------------------------- #
+
+        echo Configuring pip...
+        pip config set global.index-url \
+          "https://aws:$CODEARTIFACT_AUTH_TOKEN@${{ inputs.codeartifact-domain }}-${{ inputs.codeartifact-domain-owner }}.d.codeartifact.${{ inputs.codartifact-region }}.amazonaws.com/pypi/${{ inputs.codeartifact-repository }}/simple/"
+
+        pip config set global.extra-index-url \
+          "https://aws:$CODEARTIFACT_AUTH_TOKEN@${{ inputs.codeartifact-domain }}-${{ inputs.codeartifact-domain-owner }}.d.codeartifact.${{ inputs.codartifact-region }}.amazonaws.com/pypi/${{ inputs.codeartifact-upstream-repository }}/simple/"
+
+        # ----------------------------------------------------------------------------- #
+
+        echo Configuring twine...
+        aws codeartifact login --tool twine --domain ${{ inputs.codeartifact-domain }} --domain-owner ${{ inputs.codeartifact-domain-owner }} --repository ${{ inputs.codeartifact-repository }}
+
+        # ----------------------------------------------------------------------------- #
+
+        echo Configuring git...
+        git config --global user.name ${{ inputs.git-user }}
+        git config --global user.email ${{ inputs.git-email }}
+
+        echo Installing required tools...
+        pip install python-semantic-release poetry
+
+        echo "::set-output name=published-release-version::$(semantic-release print-version)"
+        semantic-release publish
