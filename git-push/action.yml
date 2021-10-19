@@ -1,0 +1,48 @@
+name: 'GitHub Commit & Push'
+description: 'Push changes made by actions right back into the current repository.'
+
+inputs:
+  github_token:
+    description: 'Token for the repo. Can be passed in using $\{{ secrets.GITHUB_TOKEN }}'
+    required: true
+  author_email:
+    description: 'Email used to configure user.email in `git config`.'
+    default: 'github-actions[bot]@users.noreply.github.com'
+    required: false  
+  author_name:
+    description: 'Name used to configure user.name in `git config`.'
+    default: 'github-actions[bot]'
+    required: false  
+  coauthor_email:
+    description: 'Email used to make a co-authored commit.'
+    required: false
+  coauthor_name:
+    description: 'Name used to make a co-authored commit.'
+    required: false
+  message:
+    description: 'Commit message.'
+    required: false
+  repository:
+    description: 'Repository name to push. Default or empty value represents current github repository (${GITHUB_REPOSITORY})'
+    default: ''
+    required: false
+  branch:
+    description: 'Destination branch to push changes'
+    required: false
+    default: 'main'
+  empty:
+    description: 'Allow empty commit'
+    required: false
+  force:
+    description: 'Determines if force push is used'
+    required: false
+  tags:
+    description: 'Determines if --tags is used'
+    required: false
+  directory:
+    description: 'Directory to change to before pushing.'
+    required: false
+    default: '.'
+runs:
+  using: 'node12'
+  main: 'start.js'
