@@ -40,7 +40,7 @@ inputs:
 outputs:
   published-release-version:
     description: "The version number which was released. Empty if no version was released."
-    value: ${{ steps.build-and-push.outputs.total-coverage }}
+    value: ${{ steps.build-and-push.outputs.published-release-version }}
 
 runs:
   using: "composite"
