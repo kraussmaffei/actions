@@ -16,6 +16,12 @@ inputs:
   codeartifact-role-to-assume:
     description: "The role to assume when connecting to codeartifact."
     required: true
+  codeartifact-domain:
+    description: "Domain of the aws codeartifact repository."
+    required: true
+  codeartifact-repository:
+    description: "The aws codeartifact repository."
+    required: true
   ecr-role-to-assume:
     description: "The role to assume when connecting to ecr."
     required: true
