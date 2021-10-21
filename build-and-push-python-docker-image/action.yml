@@ -50,11 +50,18 @@ runs:
         mask-aws-account-id: false
         aws-region: ${{ inputs.aws-region }}
 
-    - name: Get Codeartifact Token
+    - name: "CodeArtifact login (pip)"
+      uses: kraussmaffei/aws-tools-login@main
+      with:
+        account: ${{ inputs.aws-account-id }}
+        region: ${{ inputs.aws-region }}
+        aws-tool: "codeartifact-pip"
+        codeartifact-domain: ${{ inputs.codeartifact-domain }}
+        codeartifact-repository: ${{ inputs.codeartifact-repository }}
+
+    - name: Copy pip config to active workspace
       shell: bash
-      run: |
-        echo "CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token \
-        --domain kraussmaffei --domain-owner ${{ env.AWS_DEVOPS_ACCOUNT }} --query authorizationToken --output text)" >> $GITHUB_ENV
+      run: cp ~/.config/pip/pip.conf ./pip.conf
 
     - name: "Configure AWS Credentials"
       uses: kraussmaffei/actions/configure-aws-credentials@main
@@ -87,5 +94,5 @@ runs:
         tags: |
           ${{ env.AWS_ECR_REGISTRY }}/${{ env.REPOSITORY_NAME }}:${{ inputs.docker-image-version-tag }}
           ${{ env.AWS_ECR_REGISTRY }}/${{ env.REPOSITORY_NAME }}:latest
-        secrets: |
-          CODEARTIFACT_AUTH_TOKEN=${{ env.CODEARTIFACT_AUTH_TOKEN }}
+        secret-files: |
+          "PIP_CONFIG=./pip.conf"

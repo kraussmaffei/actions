@@ -31,9 +31,11 @@ inputs:
   git-user:
     description: "Git user to use for pushing the release on git."
     required: true
+    default: github-actions[bot]
   git-email:
     description: "Git email to use for pushing the release on git."
     required: true
+    default: github-actions[bot]@users.noreply.github.com
   gh-token:
     description: "The token to be used by python-semantic-release"
     required: true
