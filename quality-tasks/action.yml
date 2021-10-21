@@ -1,5 +1,5 @@
-name: 'Run quality tasks'
-description: 'Runs all the necessary quality task for a given python project.'
+name: "Run quality tasks"
+description: "Runs all the necessary quality task for a given python project."
 inputs:
   aws-access-key-id:
     description: "The aws access key id used for login."
@@ -26,8 +26,12 @@ inputs:
     description: "The aws codeartifact repository."
     required: true
   python-package-path:
-    description: 'Path of the python package under quality test.'
+    description: "Path of the python package under quality test."
     required: true
+  unit-test-file-pattern:
+    description: "The pattern to search for unit test files."
+    required: false
+    default: "'test*.py'"
   python-version:
     description: "The python version to use for executing the quality tasks."
     required: false
@@ -71,14 +75,14 @@ runs:
       shell: bash
       run: |
         pip install coverage flake8
-        pip install .
+        pip install .[test-dependencies]
 
     - name: Running flake8 linter...
       shell: bash
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 ./${{ inputs.python-package-path }} --count --select=E9,F63,F7,F82 --show-source --statistics
-        
+
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 ./${{ inputs.python-package-path }} --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
@@ -86,7 +90,7 @@ runs:
       id: coverage-calculator
       shell: bash
       run: |
-        coverage run --source=${{ inputs.python-package-path }} -m unittest discover -s tests -p 'test*.py'
+        coverage run --source=${{ inputs.python-package-path }} -m unittest discover -s tests -p ${{ inputs.unit-test-file-pattern }}
         echo "::set-output name=total-coverage::$(coverage report -m | grep -o -E 'TOTAL.+ ([0-9]{1,3}%)' | grep -o -E '([0-9]{1,3}%)' | grep -o -E '([0-9]+)')"
 
     - name: "Push coverage"
