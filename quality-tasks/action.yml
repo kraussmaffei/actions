@@ -42,6 +42,12 @@ inputs:
   badge-uploader-api-url:
     description: "The url for the badge uploader to use."
     required: true
+  ci-token:
+    description: "The ci token to use."
+    required: true
+  sonar-token:
+    description: "The token to use for sonarcloud."
+    required: true
 
 runs:
   using: "composite"
@@ -90,11 +96,12 @@ runs:
       id: coverage-calculator
       shell: bash
       run: |
+        coverage run --source=${{ inputs.python-package-path }} -m unittest discover -s tests -p ${{ inputs.unit-test-file-pattern }}
         coverage report -m
         coverage xml -o ./coverage-reports/coverage.xml
 
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.ci-token }}
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
