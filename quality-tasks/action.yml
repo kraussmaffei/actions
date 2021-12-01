@@ -90,18 +90,11 @@ runs:
       id: coverage-calculator
       shell: bash
       run: |
-        coverage run --source=${{ inputs.python-package-path }} -m unittest discover -s tests -p ${{ inputs.unit-test-file-pattern }}
-        echo "::set-output name=total-coverage::$(coverage report -m | grep -o -E 'TOTAL.+ ([0-9]{1,3}%)' | grep -o -E '([0-9]{1,3}%)' | grep -o -E '([0-9]+)')"
+        coverage report -m
         coverage xml -o ./coverage-reports/coverage.xml
 
-    - name: "Push coverage"
-      id: git-badge-uploader
-      uses: kraussmaffei/git-badge-uploader@main
-      with:
-        total-coverage: ${{ steps.coverage-calculator.outputs.total-coverage }}
-        aws-api-key: ${{ inputs.badge-uploader-api-key }}
-        aws-api-url: ${{ inputs.badge-uploader-api-url }}
-
-    - name: "Coverage url"
-      shell: bash
-      run: echo ${{ steps.git-badge-uploader.outputs.url }}
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
