@@ -39,6 +39,10 @@ inputs:
   gh-token:
     description: "The token to be used by python-semantic-release"
     required: true
+  python-version:
+    description: "The python version to use for executing the quality tasks."
+    required: false
+    default: "3.8"
 outputs:
   published-release-version:
     description: "The version number which was released. Empty if no version was released."
@@ -47,6 +51,11 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: "Setup Python"
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ inputs.python-version }}
+
     - name: "Configure AWS Credentials"
       uses: kraussmaffei/actions/configure-aws-credentials@main
       with:
