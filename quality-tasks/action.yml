@@ -36,12 +36,6 @@ inputs:
     description: "The python version to use for executing the quality tasks."
     required: false
     default: "3.8"
-  badge-uploader-api-key:
-    description: "The api key for the badge uploader to use."
-    required: true
-  badge-uploader-api-url:
-    description: "The url for the badge uploader to use."
-    required: true
   ci-token:
     description: "The ci token to use."
     required: true
