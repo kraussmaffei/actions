@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
-    "prepare": "ncc build index.js -o dist --source-map --license licenses.txt",
+    "prepare": "ncc build index.js -o dist && ncc build cleanup.js -o dist/cleanup --source-map --license licenses.txt",
     "all": "npm run lint && npm run prepare"
   },
   "author": "Kraussmaffei Technologies",
