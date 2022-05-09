@@ -67,7 +67,7 @@ async function run(): Promise<void> {
         break
     }
   } catch (error) {
-    core.error(error)
+    core.error(String(error))
     core.setFailed(`An error occured when executing the action!`)
   }
 }

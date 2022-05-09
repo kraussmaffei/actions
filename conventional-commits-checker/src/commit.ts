@@ -25,7 +25,7 @@ export async function getCommits(accessToken: string): Promise<Commit[]> {
     )
 
     for (const commit of pr_commits.data) {
-      commits.push((commit.commit as unknown) as Commit)
+      commits.push(commit.commit as unknown as Commit)
     }
   }
   core.debug(`Returning ${commits.length} commits.`)
