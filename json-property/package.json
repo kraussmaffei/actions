@@ -4,8 +4,9 @@
   "description": "Extracts a property from a json file.",
   "main": "index.ts",
   "scripts": {
-    "lint": "eslint **.ts",
-    "package": "tsc && ncc build -o dist"
+    "lint": "eslint .",
+    "prepare": "ncc build index.js -o dist --source-map --license licenses.txt",
+    "all": "npm run lint && npm run prepare"
   },
   "author": "Kraussmaffei Technologies",
   "license": "MIT",
@@ -14,10 +15,10 @@
   },
   "devDependencies": {
     "@types/node": "^14.14.31",
-    "@zeit/ncc": "^0.22.3",
-    "eslint": "^7.20.0",
+    "@vercel/ncc": "^0.31.1",
+    "eslint": "^8.15.0",
     "typescript": "3.8.3",
     "babel-eslint": "^10.1.0",
-    "@typescript-eslint/parser": "4.16.1"
+    "@typescript-eslint/parser": "^5.22.0"
   }
 }
