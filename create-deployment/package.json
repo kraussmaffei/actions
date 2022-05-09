@@ -4,8 +4,9 @@
   "description": "Create a github deployment.",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint **.js",
-    "package": "ncc build index.js -o dist"
+    "lint": "eslint .",
+    "prepare": "ncc build index.js -o dist --source-map --license licenses.txt",
+    "all": "npm run lint && npm run prepare"
   },
   "author": "Kraussmaffei Technologies",
   "license": "MIT",
@@ -14,7 +15,7 @@
     "@actions/github": "^4.0.0"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.22.3",
-    "eslint": "^7.20.0"
+    "@vercel/ncc": "^0.31.1",
+    "eslint": "^8.0.0"
   }
 }
