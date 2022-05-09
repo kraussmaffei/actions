@@ -1,16 +1,6 @@
 on: workflow_dispatch
 name: Test
 jobs:
-  ssh-agent:
-    name: Run local ssh-agent
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Local Action
-        uses: ./ssh-agent
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
   create-and-update-deployment:
     name: Run local create-deployment
     runs-on: ubuntu-18.04

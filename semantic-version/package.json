@@ -4,9 +4,10 @@
   "description": "Semantic Version GitHub Action",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint index.js",
-    "package": "ncc build index.js -o dist --source-map --license licenses.txt",
-    "test": "eslint index.js && jest"
+    "lint": "eslint .",
+    "prepare": "ncc build index.js -o dist --source-map --license licenses.txt",
+    "test": "eslint index.js && jest",
+    "all": "npm run lint && npm run prepare && npm run test"
   },
   "repository": {
     "type": "git",
