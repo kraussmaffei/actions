@@ -9,7 +9,7 @@
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
-    "package": "npm run build && ncc build --source-map --license licenses.txt",
+    "prepare": "npm run build && ncc build -o dist --source-map --license licenses.txt",
     "test": "jest",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
@@ -33,9 +33,9 @@
   },
   "devDependencies": {
     "@types/node": "^16.3.3",
-    "@typescript-eslint/parser": "^4.28.3",
-    "@vercel/ncc": "^0.29.0",
-    "eslint": "^7.31.0",
+    "@typescript-eslint/parser": "^5.22.0",
+    "@vercel/ncc": "^0.33.4",
+    "eslint": "^8.15.0",
     "eslint-plugin-github": "^4.1.1",
     "eslint-plugin-jest": "^24.4.0",
     "jest": "^27.0.6",
