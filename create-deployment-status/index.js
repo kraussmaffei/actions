@@ -23,8 +23,9 @@ async function main() {
         description: description,
         environment_url: environmentUrl
     }
-    console.log('createDeploymentStatus %o', req);
+    console.log('createDeploymentStatus request %o', req);
     const resp = await octokit.repos.createDeploymentStatus(req);
+    console.log('createDeploymentStatus response %o', resp)
 
 }
 
