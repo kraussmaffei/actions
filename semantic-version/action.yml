@@ -54,5 +54,5 @@ outputs:
   changed:
     description: "Indicates whether there was a change since the last version if change_path was specified. If no change_path was specified this value will always be true since the entire repo is considered."
 runs:
-  using: "node12"
+  using: "node16"
   main: "dist/index.js"

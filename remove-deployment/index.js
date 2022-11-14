@@ -14,7 +14,7 @@ async function main() {
     const octokit = github.getOctokit(token, {previews: ["flash", "ant-man"]});
 
     // get deployemnts for this enviroment
-    const {data: deployments} = await octokit.repos.listDeployments({owner, repo, environment});
+    const {data: deployments} = await octokit.rest.repos.listDeployments({owner, repo, environment});
     // for each deployment
     await ForEach(
         Array.prototype.concat.apply([], deployments),
@@ -22,12 +22,12 @@ async function main() {
             // create an inactive status (so that we can remove the deployment)
             let req = {owner, repo, deployment_id, state: 'inactive'}
             console.log('createDeploymentStatus %o', req);
-            await octokit.repos.createDeploymentStatus(req);
+            await octokit.rest.repos.createDeploymentStatus(req);
 
             // delete the deployment
             req = {owner, repo, deployment_id}
             console.log('deleteDeployment %o', req);
-            await octokit.repos.deleteDeployment(req);
+            await octokit.rest.repos.deleteDeployment(req);
         },
     );
 }
