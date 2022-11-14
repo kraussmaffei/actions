@@ -9710,7 +9710,7 @@ async function main() {
         environment_url: environmentUrl
     }
     console.log('createDeploymentStatus request %o', req);
-    const resp = await octokit.repos.createDeploymentStatus(req);
+    const resp = await octokit.rest.repos.createDeploymentStatus(req);
     console.log('createDeploymentStatus response %o', resp)
 
 }

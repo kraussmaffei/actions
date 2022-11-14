@@ -18,7 +18,7 @@ inputs:
     description: |
       Attempts to automatically merge the default branch into the requested ref,
       if it's behind the default branch. Default: true
-    default: true
+    default: "true"
   required-contexts:
     description: |
       The status contexts to verify against commit status checks. If you omit
@@ -34,7 +34,7 @@ inputs:
     description: |
       Name for the target deployment environment (e.g., production, staging, qa).
       Default: production
-    default: production
+    default: "production"
   description:
     description: |
       Short description of the deployment. Default: ""

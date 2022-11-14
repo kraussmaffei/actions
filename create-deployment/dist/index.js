@@ -9684,21 +9684,20 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-const core = __nccwpck_require__(2186);
-const github = __nccwpck_require__(5438);
+const core = __nccwpck_require__(2186)
+const github = __nccwpck_require__(5438)
 
 async function main() {
-  const ref = core.getInput('ref') || github.context.ref || github.context.sha;
-  const task = core.getInput('task', { required: true });
-  const auto_merge = core.getInput('auto-merge') === 'true';
-  const environment = core.getInput('environment', { required: true });
-  const description = core.getInput('description');
-  const transient_environment = core.getInput('transient-environment') === 'true';
+  const ref = core.getInput('ref') || github.context.ref || github.context.sha
+  const task = core.getInput('task', { required: true })
+  const auto_merge = core.getInput('auto-merge') === 'true'
+  const environment = core.getInput('environment', { required: true })
+  const description = core.getInput('description')
+  const transient_environment = core.getInput('transient-environment') === 'true'
+  const default_production_environment = (environment === 'production').toString()
+  const production_environment = (core.getInput('production-environment') || default_production_environment) === 'true'
 
-  const default_production_environment = (environment === 'production').toString();
-  const production_environment = (core.getInput('production-environment') || default_production_environment) === 'true';
-
-  const { owner, repo } = github.context.repo;
+  const { owner, repo } = github.context.repo
   const req = {
     owner,
     repo,
@@ -9711,37 +9710,38 @@ async function main() {
     transient_environment,
   };
 
-  const payload = core.getInput('payload');
+  const payload = core.getInput('payload')
   if (payload) {
-    req['payload'] = JSON.parse(payload);
+    req['payload'] = JSON.parse(payload)
   }
 
-  const required_contexts = core.getInput('required-contexts');
+  const required_contexts = core.getInput('required-contexts')
   if (required_contexts !== '*') {
     if (required_contexts === '') {
-      req['required_contexts'] = [];
+      req['required_contexts'] = []
     } else {
-      req['required_contexts'] = required_contexts.split(',');
+      req['required_contexts'] = required_contexts.split(',')
     }
   }
 
-  const token = core.getInput('github-token');
-  const octokit = github.getOctokit(token);
 
-  console.log('createDeployment %o', req);
-  const resp = await octokit.repos.createDeployment(req);
+  const token = core.getInput('github-token')
+  const octokit = github.getOctokit(token)
+
+  core.notice(`createDeployment ${JSON.stringify(req)}`)
+  const resp = await octokit.rest.repos.createDeployment(req)
 
   if (resp.status >= 400) {
-    throw new Error("Failed to create a new deployment");
+    throw new Error("Failed to create a new deployment")
   }
 
-  core.setOutput('deployment-id', resp.data.id.toString());
-  core.setOutput('deployment-url', resp.data.url);
-  core.setOutput('statuses-url', resp.data.statuses_url);
+  core.setOutput('deployment-id', resp.data.id.toString())
+  core.setOutput('deployment-url', resp.data.url)
+  core.setOutput('statuses-url', resp.data.statuses_url)
 }
 
-main().catch(function(error) {
-  core.setFailed(error.message);
+main().catch(function (error) {
+  core.setFailed(error.message)
 });
 })();
 

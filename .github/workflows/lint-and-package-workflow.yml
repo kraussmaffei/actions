@@ -21,17 +21,16 @@ jobs:
             "create-deployment",
             "remove-deployment",
             "configure-aws-credentials",
-            "json-property",
             "create-workflow-dispatch",
             "semantic-version",
-            "conventional-commits-checker"
+            "conventional-commits-checker",
           ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: "16"
       - name: Package
         run: |
           cd ${{ matrix.actions }}

@@ -7,26 +7,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Create deployment
         id: create-deployment
         uses: ./create-deployment
         with:
-          github-token: ${{ secrets.DEPLOY_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           ref: main
           task: deploy
           auto-merge: false
           required-contexts: ""
-          payload: ""
+          payload: '{
+            "test": "test-payload"
+            }'
           environment: test
           description: ""
           production-environment: false
           transient-environment: false
+
       - name: Create deployment status
         uses: ./create-deployment-status
         with:
-          github-token: ${{ secrets.DEPLOY_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           deployment-id: ${{ steps.create-deployment.outputs.deployment-id }}
           state: success
+
   remove-deployment:
     needs: create-and-update-deployment
     name: Run local remove-deployment
@@ -37,8 +42,9 @@ jobs:
       - name: Local Action
         uses: ./remove-deployment
         with:
-          github-token: ${{ secrets.DEPLOY_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           environment: test
+
   configure-aws-credentials:
     name: Configure AWS credentials
     runs-on: ubuntu-18.04
@@ -52,19 +58,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-profile: sp-exp-1
-  json-property:
-    name: Get JSON Property
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Local Action
-        id: json-property
-        uses: ./json-property
-        with:
-          path: ./test.json
-          prop_path: test_nested.test
-      - run: echo $test_nested_test
+
   create-workflow-dispatch:
     name: Run local workflow dispatch
     runs-on: ubuntu-18.04
@@ -75,31 +69,6 @@ jobs:
         uses: ./create-workflow-dispatch
         with:
           ref: main
-          github-token: ${{ secrets.DEPLOY_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           workflow-id: lint-and-package-workflow.yml
           inputs: '{"test": "true"}'
-  semantic-version:
-    name: "Test and Run"
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: NPM Install
-        run: npm ci
-      - name: Test
-        run: npm test
-      - name: Package
-        run: npm run package
-      - name: Run Action
-        uses: ./
-        id: run
-  conventional-commits-checker:
-    name: Run conventional-commits-checker
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Package
-        run: npm run all

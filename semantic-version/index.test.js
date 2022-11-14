@@ -203,7 +203,7 @@ test('Tags on branches are used', () => {
 
     // This test checks that tags are counted correctly even if they are not on
     // the main branch:
-    //  master    o--o--o--o <- expecting v0.0.2
+    //  main    o--o--o--o <- expecting v0.0.2
     //                   \
     //  release           o--o <- taged v0.0.1
 
@@ -216,7 +216,7 @@ test('Tags on branches are used', () => {
     repo.exec('git checkout -b release/0.0.1')
     repo.makeCommit('Fourth Commit'); // 0.1.1+3
     repo.exec('git tag v0.0.1');
-    repo.exec('git checkout master');
+    repo.exec('git checkout main');
     repo.makeCommit('Fifth Commit'); // 0.0.2.0
     const result = repo.runAction();
 
@@ -232,7 +232,7 @@ test('Merged tags do not affect version', () => {
 
     //                  Tagged v0.0.2
     //                      v
-    //  master    o--o--o---o---o <- expecting v0.0.3+1
+    //  main    o--o--o---o---o <- expecting v0.0.3+1
     //                   \     /
     //  release           o---o <- taged v0.0.1
 
@@ -245,7 +245,7 @@ test('Merged tags do not affect version', () => {
     repo.exec('git checkout -b release/0.0.1')
     repo.makeCommit('Fourth Commit'); // 0.1.1+3
     repo.exec('git tag v0.0.1');
-    repo.exec('git checkout master');
+    repo.exec('git checkout main');
     repo.makeCommit('Fifth Commit'); // 0.0.2.0
     repo.exec('git tag v0.0.2');
     repo.exec('git merge release/0.0.1');
